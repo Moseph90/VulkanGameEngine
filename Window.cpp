@@ -18,8 +18,9 @@ namespace engine {
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);	//Tell GLFW not to use its default openGL context when creating the window.
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);		//Window is resizeable.
 
-		/*Here we create the window, we must pass a C style string for the name and the 4th parameter is for fullscreen, which we will leave
-		empty. The last parameter is for openGL which we do not need and so we pass a null pointer*/
+		// Here we create the window, we must pass a C style string for the name and the 4th parameter 
+		// is for fullscreen, which we will leave empty. The last parameter is for openGL which we do 
+		// not need and so we pass a null pointer
 		window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, frameBufferResizeCallback);

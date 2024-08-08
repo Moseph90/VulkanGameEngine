@@ -27,7 +27,7 @@ namespace engine {
 		~Window();											//We will use these initialized values to creat the window to our liking
 															//See Window.cpp for the definitions
 
-		Window(const Window&) = delete;					//Some more clean up, just in case there are duplicate windows.
+		Window(const Window&) = delete;						//Some more clean up, just in case there are duplicate windows.
 		Window& operator=(const Window&) = delete;
 
 		bool shouldClose();									//We will use this in Application.h

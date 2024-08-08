@@ -25,6 +25,7 @@ namespace engine {
     class SwapChain {
     private:
         VkFormat swapChainImageFormat;
+        VkFormat swapChainDepthFormat; 
         VkExtent2D swapChainExtent;
 
         std::vector<VkFramebuffer> swapChainFramebuffers;
@@ -68,6 +69,14 @@ namespace engine {
         // We limit ourselves to submitting at most 2 command 
         // buffers to the device's graphics queue at once. 
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+
+        // When the swap chain is recreated, these are the only two values that may chage
+        // since the render passes are otherwise created identically. So if these are correct
+        // then that means the renderpass must be compatible
+        bool compareSwapFormats(const SwapChain& swapChain) const {
+            return swapChain.swapChainDepthFormat == swapChainDepthFormat &&
+                swapChain.swapChainImageFormat == swapChainImageFormat;
+        }
 
         SwapChain(Device &deviceRef, VkExtent2D windowExtent);
         SwapChain(Device& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);

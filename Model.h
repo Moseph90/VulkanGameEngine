@@ -1,8 +1,8 @@
-//*********************************************************************
-//The purpose of this class is to be able to take vertex data created
-//by or read in a file on the CPU and then allocate the memory and copy
-//the data over to our device GPU so it can be rendered efficiently
-//*********************************************************************
+//**********************************************************************
+// The purpose of this class is to be able to take vertex data created
+// by or read in a file on the CPU and then allocate the memory and copy
+// the data over to our device GPU so it can be rendered efficiently
+//**********************************************************************
 
 #pragma once
 
@@ -40,8 +40,8 @@ namespace engine {
 		// class manages the Vulkan buffer and memory objects
 		Model(const Model&) = delete;
 		Model& operator=(const Model&) = delete;
-		/*Model(Model&&) = default;
-		Model& operator=(Model&&) = default;*/
+		Model(Model&&) = default;
+		Model& operator=(Model&&) = default;
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);

@@ -34,14 +34,15 @@ namespace engine {
 
 		std::vector<char> buffer(fileSize);									//Initialize this vector with the file size
 
-		file.seekg(0);														//Seek to the start of the file
+		file.seekg(0);								//Seek to the start of the file
 		file.read(buffer.data(), fileSize);			//Read the file into the buffer vector with the correct number of bytes.
 		file.close();								//Close the file
 		return buffer;								//Return the vector
 	}
 
-	//Here we read the SimpleShader files (.vert and .frag) but, we actually read the the files that have the .spv extension. These can be
-	//found in the Shader folder in the main project folder. Those files are a result of the SimpleShader files being compiled by the compile.bat
+	// Here we read the SimpleShader files (.vert and .frag) but, we actually read the the files 
+	// that have the .spv extension. These can be found in the Shader folder in the main project 
+	// folder. Those files are a result of the SimpleShader files being compiled by the compile.bat
 	void Pipeline::createGraphicsPipeline(
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
