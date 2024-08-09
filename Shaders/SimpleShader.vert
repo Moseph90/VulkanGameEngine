@@ -16,13 +16,13 @@
 // reference in the shader. Each time this code is run
 // the position will have a different x and y component
 
-layout (location = 0) in vec2 position;
-
+layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 color;
 
+layout (location = 0) out vec3 fragColor;
+
 layout (push_constant) uniform Push {
-	mat2 transform;
-	vec2 offset;
+	mat4 transform;
 	vec3 color;
 } push;
 
@@ -35,5 +35,7 @@ void main() {
 	// The last parameter is what the entire vector is divided by in order to turn it into a normalized 
 	// coordinate. For now it's one
 
-	gl_Position = vec4(push.transform * position + push.offset, 0.0, 1.0);
+	//gl_Position = vec4(push.transform * position + push.offset, 0.0, 1.0);
+	gl_Position = push.transform * vec4(position, 1.0);
+	fragColor = color;
 }

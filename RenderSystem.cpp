@@ -10,9 +10,8 @@
 
 namespace engine {
 	struct SimplePushConstantData {
-		glm::mat2 transform{ 1.0f };
-		glm::vec2 offset;
-		alignas(16) glm::vec3 color;
+		glm::mat4 transform{ 1.0f };
+		alignas(16) glm::vec3 color{};
 	};
 
 	RenderSystem::RenderSystem(Device& tempDevice, VkRenderPass renderPass) : device{ tempDevice } {
@@ -66,16 +65,16 @@ namespace engine {
 			device,
 			pipelineConfig);
 	}
-	void RenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects) {
+	void RenderSystem::renderGameObjects(
+		VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects, Camera &camera) {
 		pipeline->bind(commandBuffer);
 
-		for (auto& obj : gameObjects) {
-			obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.01f, glm::two_pi<float>());
+		auto projectionView = camera.getProjection() * camera.getView();
 
+		for (auto& obj : gameObjects) {
 			SimplePushConstantData push{};
-			push.offset = obj.transform2D.translation;
 			push.color = obj.color;
-			push.transform = obj.transform2D.mat2();
+			push.transform = projectionView * obj.transform.mat4();
 
 			vkCmdPushConstants(
 				commandBuffer,

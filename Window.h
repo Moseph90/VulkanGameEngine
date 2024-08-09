@@ -25,19 +25,20 @@ namespace engine {
 	public:
 		Window(int width, int height, std::string name);	//A contstructor for initializing the width, height and name of the window
 		~Window();											//We will use these initialized values to creat the window to our liking
-															//See Window.cpp for the definitions
+		//See Window.cpp for the definitions
 
 		Window(const Window&) = delete;						//Some more clean up, just in case there are duplicate windows.
 		Window& operator=(const Window&) = delete;
 
 		bool shouldClose();									//We will use this in Application.h
 
-		VkExtent2D getExtent() { 
-			return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; 
+		VkExtent2D getExtent() {
+			return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 		}
-		bool wasWindowResized() { return frameBufferResized; }
+		bool wasWindowResized() const { return frameBufferResized; }
 		void resetWindowResizedFlag() { frameBufferResized = false; }
-
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
+		GLFWwindow* getGLFWwindow() const { return window; }
 	};
 }

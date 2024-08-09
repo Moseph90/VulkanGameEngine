@@ -35,7 +35,7 @@ namespace engine {
 		void loadGameObjects();
 
 	public:
-		static constexpr int WIDTH{ WINDOW_WIDTH };			//We do this so that these variables are accessable to other parts of the program
+		static constexpr int WIDTH{ WINDOW_WIDTH };		//We do this so that these variables are accessable to other parts of the program
 		static constexpr int HEIGHT{ WINDOW_HEIGHT };
 		
 		Application();

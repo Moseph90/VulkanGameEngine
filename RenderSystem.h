@@ -3,6 +3,7 @@
 #define WINDOW_WIDTH 3200					//Change these to alter the default window size
 #define WINDOW_HEIGHT 1800
 
+#include "Camera.h"
 #include "Device.h"
 #include "GameObject.h"
 #include "Pipeline.h"
@@ -30,7 +31,8 @@ namespace engine {
 		RenderSystem(Device &device, VkRenderPass renderPass);
 		~RenderSystem();
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects);
+		void renderGameObjects(
+			VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects, Camera &camera);
 
 		RenderSystem(const RenderSystem&) = delete;				//Delete copy constructors
 		RenderSystem& operator=(const RenderSystem&) = delete;

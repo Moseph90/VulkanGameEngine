@@ -66,8 +66,8 @@ namespace engine {
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0; // This corresponds to the location in the vertex shader
 		
-		// This specifies the data type that we have of the two components that are each 32 bit sin floats
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		// This specifies the data type that we have three components that are each 32 bit sin floats
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 
 		// This will automatically calculate the byte offset of the position member in the Vertex struct
 		attributeDescriptions[0].offset = offsetof(Vertex, position);

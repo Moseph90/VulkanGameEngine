@@ -5,14 +5,14 @@
 //There is no built in output variable for this one so we have to build our own.
 //*******************************************************************************************************
 
-/*Layout qualifier takes a location value, the "out" qualifier indicates that this variable is for output
-the rest is for the name and type.*/
+layout (location = 0) in vec3 fragColor;
 
+// Layout qualifier takes a location value, the "out" qualifier indicates 
+// that this variable is for output the rest is for the name and type.
 layout (location = 0) out vec4 outColor;
 
 layout (push_constant) uniform Push {
-	mat2 transform;
-	vec2 offset;
+	mat4 transform;
 	vec3 color;
 } push;
 
@@ -22,5 +22,5 @@ void main() {
 	// stage that tells the graphics card which pixels the geometry mostly contains during the restorization 
 	// stage. It will use this to properly color the pixels later.
 
-	outColor = vec4(push.color, 1.0);
+	outColor = vec4(fragColor, 1.0);
 }
