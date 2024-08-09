@@ -10,6 +10,11 @@
 namespace engine {
 	class InputController {
 	private:
+        GLFWwindow* window;
+        double prevX{ 0 }, prevY{ 0 };
+        double currX{ 0 }, currY{ 0 };
+
+        glm::vec3 updateMouseMotion();
 	
 	public:
 		struct KeyMappings {
@@ -20,15 +25,17 @@ namespace engine {
             int moveUp = GLFW_KEY_E;
             int moveDown = GLFW_KEY_Q;
 
-            // These ones are for mouse movements
+            // These ones are for arrow keys
             int lookLeft = GLFW_KEY_LEFT;
             int lookRight = GLFW_KEY_RIGHT;
             int lookUp = GLFW_KEY_UP;
             int lookDown = GLFW_KEY_DOWN;
 		};
+        InputController(GLFWwindow* tempWindow);
+
         // This function will move a game object with the controls being 
         // relative to the direction the object is facing within the XZ plane
-        void moveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject);
+        void moveInPlaneXZ(float dt, GameObject& gameObject);
 
         KeyMappings keys{};
         float moveSpeed{ 3.0f };

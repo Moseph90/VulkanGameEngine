@@ -24,12 +24,12 @@ namespace engine {
 		RenderSystem renderSystem{ device, renderer.getSwapChainRenderPass() };
         Camera camera{};
         //camera.setViewDirection(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
-        camera.setViewTarget(glm::vec3{ -1.0f, -2.0f, 2.0f }, glm::vec3{ 0.0f, 0.0f, 2.5f });
+        camera.setViewTarget(glm::vec3{-1.0f, -2.0f, 2.0f }, glm::vec3{0.0f, 0.0f, 2.5f});
 
         // This game object has no model and will not be rendered 
         // but is just used to store the camera's current state
         auto viewerObject = GameObject::createGameObject();
-        InputController cameraController{};
+        InputController cameraController{ window.getGLFWwindow()};
 
         // Here we are creating a chrono object so that we can implement time
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -48,7 +48,7 @@ namespace engine {
 
             // This will update the view object's transform component based on the keyboard 
             // input proportional to the amount of time elapsed since the last frame.
-            cameraController.moveInPlaneXZ(window.getGLFWwindow(), frameTime, viewerObject);
+            cameraController.moveInPlaneXZ(frameTime, viewerObject);
 
             // We update our camera object using the new state of the view object
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
