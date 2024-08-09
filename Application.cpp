@@ -57,8 +57,11 @@ namespace engine {
                                                 
             // We put this here so that the projection matrix will always 
             // be up to date with the current aspect ratio of the window
-            //camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);  //We removed this one in favor of perspective
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f); 
+
+            //We removed this one in favor of perspective
+            //camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1); 
+            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+
 			// The beginFrame function in Renderer will return
 			// a nullptr if the swap chain needs to be created
 			if (auto commandBuffer = renderer.beginFrame()) {
