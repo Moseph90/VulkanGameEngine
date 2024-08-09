@@ -41,12 +41,12 @@ namespace engine {
 
 		// If we press the keys, set the moveDir variable to the appropriate values
 		glm::vec3 moveDir{ 0.0f };
-		if (glfwGetKey(window, keys.moveForward) == GLFW_PRESS) moveDir -= forwardDir;
-		if (glfwGetKey(window, keys.moveBackward) == GLFW_PRESS) moveDir += forwardDir;
-		if (glfwGetKey(window, keys.moveRight) == GLFW_PRESS) moveDir -= rightDir;
-		if (glfwGetKey(window, keys.moveLeft) == GLFW_PRESS) moveDir += rightDir;
-		if (glfwGetKey(window, keys.moveUp) == GLFW_PRESS) moveDir -= upDir;
-		if (glfwGetKey(window, keys.moveDown) == GLFW_PRESS) moveDir += upDir;
+		if (glfwGetKey(window, keys.moveForward) == GLFW_PRESS) moveDir += forwardDir;
+		if (glfwGetKey(window, keys.moveBackward) == GLFW_PRESS) moveDir -= forwardDir;
+		if (glfwGetKey(window, keys.moveRight) == GLFW_PRESS) moveDir += rightDir;
+		if (glfwGetKey(window, keys.moveLeft) == GLFW_PRESS) moveDir -= rightDir;
+		if (glfwGetKey(window, keys.moveUp) == GLFW_PRESS) moveDir += upDir;
+		if (glfwGetKey(window, keys.moveDown) == GLFW_PRESS) moveDir -= upDir;
 
 		// Make sure that the moveDir vector is greater than 0 so that we don't normalize 0
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
@@ -69,7 +69,7 @@ namespace engine {
 		// Now deltaX and deltaY contain the motion of the mouse in the X and Y directions
 		// You can use this as a vec2 or separately
 		// For example:
-		glm::vec3 mouseMotion{ deltaY, -deltaX, 0.0f };
+		glm::vec3 mouseMotion{ -deltaY, deltaX, 0.0f };
 		return mouseMotion;
 	}
 

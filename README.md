@@ -5,7 +5,7 @@
 
  This file is structured in a classic C++ way. There are .h files and .cpp files. Some of the function definitions are in the header files if they are small enough and most will be in the corresponding cpp file.
 
-As of now, the program creates a colored cube that you can control with WASD and the middle mouse button + mouse motion (at the same time). WASD controls the translation of the object relative to the camera and the middle mouse button + mouse motion controls the rotation. Right now, it's set to perspective mode. I also added a couple classes since last time, the Camera class and the Input Controller class. The Input Controller is just temporary for now and will be abstracted in the future. I also added chrono for delta time and now can keep movement consisten between frames regardless of the refresh rate or present mode.
+As of now, the program creates a colored cube and has a virtual camera that you can control with WASD and the middle mouse button + mouse motion (at the same time). WASD controls the translation of the camera in world space, E and Q for up and down, and the middle mouse button + mouse motion controls the rotation our camera in world space. Right now, it's set to perspective mode.
 
  If you wish to change the present mode, or rather check for additional present modes that are supported by your graphics cards, go to the SwapChain.cpp file and see the chooseSwapPresentMode function. There, you will see that the program checks for mailbox present mode and then defaults to FIFO(V-sync). If you wish to check for Immediate present mode, simply uncomment the chunk of code from line 404 to 409. After implementing the delta time feature, the cube's movement should remain consistent.
 
