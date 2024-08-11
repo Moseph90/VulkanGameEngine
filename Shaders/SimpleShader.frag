@@ -9,13 +9,14 @@ layout (location = 0) in vec3 fragColor;
 
 // Layout qualifier takes a location value, the "out" qualifier indicates 
 // that this variable is for output the rest is for the name and type.
+
 layout (location = 0) out vec4 outColor;
 
+// This is connected to the push constants struct in RenderSystem.cpp
 layout (push_constant) uniform Push {
-	mat4 transform;
-	vec3 color;
+	mat4 transform;			// Projection * view * model
+	mat4 normalMatrix;
 } push;
-
 void main() {
 
 	// These values are RGB and the Alpha, meaning the value of the color. This is just a compiling 

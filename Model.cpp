@@ -1,5 +1,29 @@
 #include "Model.h"
+#include "Utils.h"
+
+// libs
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+#define GLM_ENABLE_EXPERIMENTAL // This will help us hash the individual glm vec components
+#include <glm/gtx/hash.hpp>
+
+// std
 #include <cassert>
+#include <unordered_map>
+
+namespace std {
+	template <>
+
+	// With this we can take an instance of the Vertex struct and hash it to a single 
+	// value type size_t, which can then be used by an unordered map as the key
+	struct hash<engine::Model::Vertex> {
+		size_t operator()(engine::Model::Vertex const& vertex) const {
+			size_t seed = 0;		// This will store the final hash value
+			engine::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			return seed;
+		}
+	};
+}
 
 namespace engine {
 	Model::Model(Device &tempDevice, const Model::Builder &builder) : device{tempDevice}{
@@ -15,6 +39,14 @@ namespace engine {
 			vkFreeMemory(device.device(), indexBufferMemory, nullptr);
 		}
 	}
+
+	std::unique_ptr<Model> Model::createModelFromFile(
+		Device& device, const std::string& filePath) {
+		Builder builder{};
+		builder.loadModel(filePath);
+		return std::make_unique<Model>(device, builder);
+	}
+
 	void Model::createVertexBuffers(const std::vector<Vertex>& vertices) {
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -163,24 +195,90 @@ namespace engine {
 		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return bindingDescriptions;
 	}
+
 	std::vector<VkVertexInputAttributeDescription> Model::Vertex::getAttributeDescriptions() {
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0; // This corresponds to the location in the vertex shader
-		
-		// This specifies the data type that we have three components that are each 32 bit sin floats
-		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
-		// This will automatically calculate the byte offset of the position member in the Vertex struct
-		attributeDescriptions[0].offset = offsetof(Vertex, position);
+		// Arguments are in this order: 
+		// 1. Location, corresponds to the location of the vertex shader
+		// 2. Binding, 0 because we are interleaving everything together
+		// 3. Format, specifies the data type. (3 components that are each 32 bit sin floats)
+		// 4. Offset, auto calculate the byte offset of the position member in the Vertex struct
+		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
+		attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) });
+		attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
+		attributeDescriptions.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
 
-		// Binding remains 0 for the color because we are interleaving the color and position together
-		attributeDescriptions[1].binding = 0;
-		attributeDescriptions[1].location = 1; // This corresponds to the location in the fragment shader
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		
-		// This will automatically calculate the byte offset of the color member in the Vertex struct
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
 		return attributeDescriptions;
+	}
+
+	// Here we load in the models using tiny object loader
+	void Model::Builder::loadModel(const std::string& filePath) {
+		// This records the position, color, normal and texture coordinate data
+		tinyobj::attrib_t attrib;
+		std::vector<tinyobj::shape_t> shapes;	// Contains the index values for each face element
+		std::vector<tinyobj::material_t> materials;
+		std::string warn, error;
+
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &error, filePath.c_str())) {
+			throw std::runtime_error(warn + " " + error);
+		}
+		vertices.clear();
+		indices.clear();
+
+		// This map will keep track of the vertices which have already been added to the
+		// builder.vertices vector and store the position at which the vertex was originally added
+		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+		for (const auto& shape : shapes) {
+			// Loop through each face element in the model getting the index values
+			for (const auto& index : shape.mesh.indices) {
+				Vertex vertex{};
+				// The vertex index is the first value of the face element and says
+				// what position value to use. Index values are optional and a negative
+				// value indicates that no index was provided. If one is we continue
+				if (index.vertex_index >= 0) {
+					// Each vertex has 3 values that are tightly packed in the attrib.vertices
+					// array. To read the corresponding position, we need to multiply by 3 and
+					// then add 0 for the initial component, followed by 1 and 2 for Z and Y. 
+					vertex.position = {
+						attrib.vertices[3 * index.vertex_index + 0],
+						attrib.vertices[3 * index.vertex_index + 1],
+						attrib.vertices[3 * index.vertex_index + 2]
+					};
+					// We use the last index because color attributes are optional
+					// and this is a convenient way to check that a color has been
+					// provided and the index is in bounds. In some formats, the
+					// RGB information will be right after the last vertex position
+					vertex.color = {
+						attrib.colors[3 * index.vertex_index + 0],
+						attrib.colors[3 * index.vertex_index + 1],
+						attrib.colors[3 * index.vertex_index + 2]
+					};
+				}
+				if (index.normal_index >= 0) {
+					vertex.normal = {
+						attrib.normals[3 * index.normal_index + 0],
+						attrib.normals[3 * index.normal_index + 1],
+						attrib.normals[3 * index.normal_index + 2]
+					};
+				}
+				// UVs only have two values
+				if (index.texcoord_index >= 0) {
+					vertex.uv = {
+						attrib.texcoords[2 * index.texcoord_index + 0],
+						attrib.texcoords[2 * index.texcoord_index + 1]
+					};
+				}
+				// If the vertex is new, we add it to the unique vertices map
+				if (uniqueVertices.count(vertex) == 0) {
+					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+					vertices.push_back(vertex);
+				}
+				// With this we add the position of the 
+				// vertex to the builder's indices vector
+				indices.push_back(uniqueVertices[vertex]);
+			}
+		}
 	}
 }

@@ -11,12 +11,19 @@
 #include <stdexcept>
 #include <array>
 #include <chrono>
+#include <iostream>
 
 namespace engine {
+    double scroll{ 0 };
+
+    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+        scroll = yoffset;
+    }
 
 	Application::Application() {
 		loadGameObjects();			// This uses the Model class to take vertex data from the CPU and copy it into the GPU
-	}
+        glfwSetScrollCallback(window.getGLFWwindow(), scroll_callback);
+    }
 
 	Application::~Application() {}
 
@@ -48,7 +55,8 @@ namespace engine {
 
             // This will update the view object's transform component based on the keyboard 
             // input proportional to the amount of time elapsed since the last frame.
-            cameraController.moveInPlaneXZ(frameTime, viewerObject);
+            cameraController.moveInPlaneXZ(frameTime, viewerObject, scroll);
+            scroll = 0;
 
             // We update our camera object using the new state of the view object
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
@@ -70,70 +78,31 @@ namespace engine {
 				renderer.endSwapChainRenderPass(commandBuffer);
 				renderer.endFrame();
 			}
-		}										
+		}
 		vkDeviceWaitIdle(device.device());
 	}
 
-    std::unique_ptr<Model>  createCubeModel(Device& device, glm::vec3 offset) {
-        Model::Builder modelBuilder{};
-        modelBuilder.vertices = {
-
-         // left face (white)
-         {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-         {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-         {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-         {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-
-         // right face (yellow)
-         {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-         {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-         {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-         {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-
-         // top face (orange, remember y axis points down)
-         {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-         {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-         {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-         {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-
-         // bottom face (red)
-         {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-         {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-         {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-         {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-
-         // nose face (blue)
-         {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-         {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-         {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-         {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-
-         // tail face (green)
-         {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-         {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-         {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-         {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-
-        };
-
-        for (auto& v : modelBuilder.vertices) {
-            v.position += offset;
-        }
-
-        // This specifies which vertex values are used for each triangle. Without this,
-        // the cube would be collapsed, as the triangles would share abritrary vertices
-        modelBuilder.indices = { 0,  1,  2,  0,  3,  1,  4,  5,  6,  4,  7,  5,  8,  9,  10, 8,  11, 9,
-                         12, 13, 14, 12, 15, 13, 16, 17, 18, 16, 19, 17, 20, 21, 22, 20, 23, 21 };
-
-        return std::make_unique<Model>(device, modelBuilder);
-    }
     void Application::loadGameObjects() {
-        std::shared_ptr<Model> model = createCubeModel(device, { 0.0f, 0.0f, 0.0f });
 
-        auto cube = GameObject::createGameObject();
-        cube.model = model;
-        cube.transform.translation = { 0.0f, 0.0f, 2.5f };
-        cube.transform.scale = { 0.5f, 0.5f, 0.5f };
-        gameObjects.push_back(std::move(cube));
+        std::shared_ptr<Model> model = Model::createModelFromFile(device, "TestModels/flat_vase.obj");
+        auto gameObject = GameObject::createGameObject();
+        gameObject.model = model;
+        gameObject.transform.translation = { 2.0f, 0.5f, 2.5f };
+        gameObject.transform.scale = glm::vec3(3.0f);
+        gameObjects.push_back(std::move(gameObject));
+
+        model = Model::createModelFromFile(device, "TestModels/smooth_vase.obj");
+        auto smoothVase = GameObject::createGameObject();
+        smoothVase.model = model;
+        smoothVase.transform.translation = { 0.0f, 0.5f, 2.5f };
+        smoothVase.transform.scale = glm::vec3(3.0f);
+        gameObjects.push_back(std::move(smoothVase));
+
+        model = Model::createModelFromFile(device, "TestModels/colored_cube.obj");
+        auto coloredCube = GameObject::createGameObject();
+        coloredCube.model = model;
+        coloredCube.transform.translation = { -2.0f, 0.0f, 2.5f };
+        coloredCube.transform.scale = glm::vec3(0.5f);
+        gameObjects.push_back(std::move(coloredCube));
     }
 }

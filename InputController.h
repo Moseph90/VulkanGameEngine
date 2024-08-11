@@ -35,7 +35,7 @@ namespace engine {
 
         // This function will move a game object with the controls being 
         // relative to the direction the object is facing within the XZ plane
-        void moveInPlaneXZ(float dt, GameObject& gameObject);
+        void moveInPlaneXZ(float dt, GameObject& gameObject, int scroll);
 
         KeyMappings keys{};
         float moveSpeed{ 3.0f };

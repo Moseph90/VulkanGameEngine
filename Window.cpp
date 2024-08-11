@@ -3,7 +3,6 @@
 #include <iostream>
 
 namespace engine {
-
 	Window::Window(int w, int h, std::string name) : width(w), height(h), windowName(name) {
 		initWindow();
 	}

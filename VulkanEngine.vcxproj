@@ -70,13 +70,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>
+    </IncludePath>
+    <ExternalIncludePath>$(ExternalIncludePath)</ExternalIncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\C++Libraries\glm-master;D:\C++Libraries\glfw-3.4.bin.WIN64\include;D:\C++Libraries\VulkanSDK\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\C++Libraries\glm-master;D:\C++Libraries\glfw-3.4.bin.WIN64\include;D:\C++Libraries\VulkanSDK\Include;D:\C++Libraries\TinyObjectLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -97,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\C++Libraries\glm-master;D:\C++Libraries\glfw-3.4.bin.WIN64\include;D:\C++Libraries\VulkanSDK\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\C++Libraries\glm-master;D:\C++Libraries\glfw-3.4.bin.WIN64\include;D:\C++Libraries\VulkanSDK\Include;D:\C++Libraries\TinyObjectLoader</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -115,7 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\C++Libraries\glm-master;D:\C++Libraries\glfw-3.4.bin.WIN64\include;D:\C++Libraries\VulkanSDK\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\C++Libraries\glm-master;D:\C++Libraries\glfw-3.4.bin.WIN64\include;D:\C++Libraries\VulkanSDK\Include;D:\C++Libraries\TinyObjectLoader</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -149,6 +154,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Device.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -169,6 +175,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="SwapChain.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
