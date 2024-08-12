@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Device.h"
+#include "Buffer.h"
 
 #define GLM_FORCE_RADIANS				// All GLM functions will expect angles in radians 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE		// GLM will expect or depth buffer values to range from 0 - 1
@@ -19,15 +20,13 @@ namespace engine {
 	class Model {
 	private:
 		Device &device;
-		VkBuffer vertexBuffer;				// In Vulkan, the buffer and it's assigned memory are
-		VkDeviceMemory vertexBufferMemory;	// two separate objects so we can have more control
+		std::unique_ptr<Buffer> vertexBuffer;
 		uint32_t vertexCount;
 
 		// This bool is so that we can have two options remain available to us. We
 		// can create a model with only vertices and no indices or one that uses both
 		bool hasIndexBuffer{ false };
-		VkBuffer indexBuffer;
-		VkDeviceMemory indexBufferMemory;
+		std::unique_ptr<Buffer> indexBuffer;
 		uint32_t indexCount;
 
 		struct Vertex;

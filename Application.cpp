@@ -2,32 +2,55 @@
 #include "RenderSystem.h"
 #include "Camera.h"
 #include "InputController.h"
+#include "Buffer.h"
 
+// libs
 #define GLM_FORCE_RADIANS				// All GLM functions will expect angles in radians 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE		// GLM will expect or depth buffer values to range from 0 - 1
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
+// std
 #include <stdexcept>
 #include <array>
 #include <chrono>
 #include <iostream>
 
 namespace engine {
-    double scroll{ 0 };
+    // This serves a similar purpose as the simple push constant data
+    // using it as a way to pass and read data to the pipeline shaders
+    struct GlobalUbo {
+        glm::mat4 projectionView{ 1.0f };
+        glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+    };
 
+    // This stuff is getting the scroll wheel behaviour from the user
+    double scroll{ 0 };
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
         scroll = yoffset;
     }
 
 	Application::Application() {
-		loadGameObjects();			// This uses the Model class to take vertex data from the CPU and copy it into the GPU
+		loadGameObjects();			// This uses the Model class to take vertex 
+                                    // data from the CPU and copy it into the GPU
         glfwSetScrollCallback(window.getGLFWwindow(), scroll_callback);
     }
 
 	Application::~Application() {}
 
 	void Application::run() {
+        std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < uboBuffers.size(); i++) {
+            uboBuffers[i] = std::make_unique<Buffer>(
+                device,
+                sizeof(GlobalUbo),
+                1,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,     // The value that dictate how many frames can
+                                                        // be submitted for rendering simultaneously.
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);   // Not using host coherent so that we can selectively flush
+            uboBuffers[i]->map();
+        }
+
 		RenderSystem renderSystem{ device, renderer.getSwapChainRenderPass() };
         Camera camera{};
         //camera.setViewDirection(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
@@ -73,8 +96,23 @@ namespace engine {
 			// The beginFrame function in Renderer will return
 			// a nullptr if the swap chain needs to be created
 			if (auto commandBuffer = renderer.beginFrame()) {
+                int frameIndex = renderer.getFrameIndex();
+                FrameInfo frameInfo{
+                    frameIndex,
+                    frameTime,
+                    commandBuffer,
+                    camera
+                };
+                
+                // update in memory
+                GlobalUbo ubo{};
+                ubo.projectionView = camera.getProjection() * camera.getView();
+                uboBuffers[frameIndex]->writeToBuffer(&ubo);
+                uboBuffers[frameIndex]->flush();        // Manually flush memory to the GPU
+
+                // draw calls will be recorded
 				renderer.beginSwapChainRenderPass(commandBuffer);
-				renderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+				renderSystem.renderGameObjects(frameInfo, gameObjects);
 				renderer.endSwapChainRenderPass(commandBuffer);
 				renderer.endFrame();
 			}
@@ -88,7 +126,7 @@ namespace engine {
         auto gameObject = GameObject::createGameObject();
         gameObject.model = model;
         gameObject.transform.translation = { 2.0f, 0.5f, 2.5f };
-        gameObject.transform.scale = glm::vec3(3.0f);
+        gameObject.transform.scale = {3.0f, 2.0f, 3.0f};
         gameObjects.push_back(std::move(gameObject));
 
         model = Model::createModelFromFile(device, "TestModels/smooth_vase.obj");

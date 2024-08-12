@@ -7,6 +7,7 @@
 #include "Device.h"
 #include "GameObject.h"
 #include "Pipeline.h"
+#include "FrameInfo.h"
 
 // std
 #include <memory>
@@ -32,7 +33,7 @@ namespace engine {
 		~RenderSystem();
 
 		void renderGameObjects(
-			VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects, Camera &camera);
+			FrameInfo& frameInfo, std::vector<GameObject> &gameObjects);
 
 		RenderSystem(const RenderSystem&) = delete;				//Delete copy constructors
 		RenderSystem& operator=(const RenderSystem&) = delete;
