@@ -31,7 +31,9 @@ namespace engine {
         uint32_t presentFamily;
         bool graphicsFamilyHasValue = false;
         bool presentFamilyHasValue = false;
-        bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
+        bool isComplete() {
+            return graphicsFamilyHasValue && presentFamilyHasValue;
+        }
     };
 
     class Device {

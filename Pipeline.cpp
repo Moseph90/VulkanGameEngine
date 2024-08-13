@@ -66,9 +66,9 @@ namespace engine {
 		VkPipelineShaderStageCreateInfo shaderStages[2];
 
 		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;		//This says that this stage is for the vertex shader
+		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;	//This says that this stage is for the vertex shader
 		shaderStages[0].module = vertShaderModule;
-		shaderStages[0].pName = "main";							//This is the name of our entry function in our vertex shader
+		shaderStages[0].pName = "main";						//This is the name of our entry function in the shader
 		shaderStages[0].flags = 0;
 		shaderStages[0].pNext = nullptr;
 		//This one is a mechanism to customize shader functionality
@@ -91,16 +91,15 @@ namespace engine {
 		// buffer data that is the initial data into our graphics pipeline
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
 		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 		vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
-		//Now we pass in all of the info that we inputted above in order to create assign the graphics pipeline info
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = 2;						//How many programmable stages our pipeline will use (fragment and vertex shaders for now)
-		pipelineInfo.pStages = shaderStages;				//Now we pass in the shaderStages that we set above
+		pipelineInfo.stageCount = 2;						// 2 stages, fragment and vertex shaders
+		pipelineInfo.pStages = shaderStages;				// Now we pass in the shaderStages that we set above
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
 		pipelineInfo.pViewportState = &configInfo.viewportInfo;

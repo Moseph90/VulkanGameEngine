@@ -7,7 +7,7 @@
 namespace engine {
 
 	Renderer::Renderer(Window& tempWindow, Device& tempDevice) : window{ tempWindow }, device{ tempDevice } {
-		recreateSwapChain();			// This goes into Pipeline and creates a pipeline object using our unique pointer
+		recreateSwapChain();
 
 		// In Vulkan, we're not able to execute commands directly with function calls. We're first required
 		// to record them to a command buffer and then submit the buffer to a device queue to be executed.
@@ -52,7 +52,7 @@ namespace engine {
 	// 5. We record a command to draw the vertex buffer data
 	// 6. End the render pass
 	void Renderer::createCommandBuffers() {
-		// The swap chain image count will likely be 2 of 3 depending 
+		// The swap chain image count will likely be 2 or 3 depending 
 		// on whether the device supports triple or double buffering
 		// as each command buffer will draw to a different frame buffer
 		commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -117,6 +117,7 @@ namespace engine {
 	void Renderer::endFrame() {
 		assert(isFrameStarted && "Cannot call endFrame() when frame is not in progress");
 
+		// Here's where we end the recording of the command buffer
 		auto commandBuffer = getCommandBuffer();
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to record command buffer");

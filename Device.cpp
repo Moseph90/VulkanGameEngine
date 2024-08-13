@@ -65,7 +65,7 @@ namespace engine {
 
     Device::~Device() {
         vkDestroyCommandPool(device_, commandPool, nullptr);
-
+        
         vkDestroyDevice(device_, nullptr);
 
         if (enableValidationLayers) {
@@ -380,6 +380,8 @@ namespace engine {
         return indices;
     }
 
+    // This is used by the SwapChain class to create a swap chain. Here we are sending our struct 
+    // objects into the Vulkan SDK to get info from the graphics card rather than us filling it out
     SwapChainSupportDetails Device::querySwapChainSupport(VkPhysicalDevice device) {
         SwapChainSupportDetails details;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface_, &details.capabilities);

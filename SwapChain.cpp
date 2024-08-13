@@ -25,12 +25,12 @@ namespace engine {
     }
 
     void SwapChain::init() {
-        createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDepthResources();
-        createFramebuffers();
-        createSyncObjects();
+        createSwapChain();          // Manager for the images to be displayed
+        createImageViews();         // Settings saying how the images should be processed
+        createRenderPass();         // Rendering instructions for the frame buffer
+        createDepthResources();     // Make sure object don't show when they're behind others
+        createFramebuffers();       // Gets added to the command buffer's instructions for rendering
+        createSyncObjects();        // Semaphores and fences(signals) for Vulkan to know when to execute
     }
 
     SwapChain::~SwapChain() {
@@ -76,15 +76,21 @@ namespace engine {
               device.device(),
               swapChain,
               std::numeric_limits<uint64_t>::max(),
-              imageAvailableSemaphores[currentFrame],  // must be a not signaled semaphore
-              VK_NULL_HANDLE,
+              imageAvailableSemaphores[currentFrame],  // This will signal when finished
+              VK_NULL_HANDLE,   // This is for a fence, which is a semaphore for CPUs
               imageIndex);
 
         return result;
     }
 
+    // This  handles both the draw and present functionality using the Vulkan functions
     VkResult SwapChain::submitCommandBuffers(
         const VkCommandBuffer *buffers, uint32_t *imageIndex) {
+
+        // If we have an image ready, we wait for the imagesInFlight signal
+        // before submitting the command buffer. As you will see inside of
+        // function, the imagesInFlight fence is signaled when the previous
+        // queue has been submitted and processed.
         if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
             vkWaitForFences(device.device(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
@@ -93,6 +99,9 @@ namespace engine {
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
+        // This is the semaphore that was used in the acquireNextImage function(above this one). We
+        // use it in this struct so that the vkQueueSubmit function tells the graphics card to wait 
+        // for the appropriate signal before excecuting the instructions from the command buffer
         VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
@@ -102,10 +111,13 @@ namespace engine {
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = buffers;
 
+        // This is the semaphore that function will signal when it's done. The
+        // wait semaphore(above) is the one that the function itself waits for.
         VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
+        // Here we reset the fences for the next frame
         vkResetFences(device.device(), 1, &inFlightFences[currentFrame]);
         if (vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
             VK_SUCCESS) {
@@ -115,6 +127,8 @@ namespace engine {
         VkPresentInfoKHR presentInfo = {};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
+        // The queue present function will wait for the signalSemaphore 
+        // from the queue submit(above) to finish before completing.
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = signalSemaphores;
 
@@ -124,6 +138,7 @@ namespace engine {
 
         presentInfo.pImageIndices = imageIndex;
 
+        //****This is where the image is actually presented to the surface*****
         auto result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -131,19 +146,25 @@ namespace engine {
         return result;
     }
 
+    // Swap chain creation requies a lot of settings and information
+    // Some info we have to get from the graphics card itself
     void SwapChain::createSwapChain() {
         SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
 
+        // We choose the format/color space, how to present, and the size of the image
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
         VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
+        // Making sure we don't have a higher image count 
+        // than the max our graphics card will allow
         uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
         if (swapChainSupport.capabilities.maxImageCount > 0 &&
             imageCount > swapChainSupport.capabilities.maxImageCount) {
             imageCount = swapChainSupport.capabilities.maxImageCount;
         }
 
+        // As usual, we fill out the createInfo struct before we can create.
         VkSwapchainCreateInfoKHR createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         createInfo.surface = device.surface();
@@ -155,6 +176,8 @@ namespace engine {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
+        // This is a struct I made to give us a graphics and present 
+        // queue. We need these queues to execute command buffers
         QueueFamilyIndices indices = device.findPhysicalQueueFamilies();
         uint32_t queueFamilyIndices[] = {indices.graphicsFamily, indices.presentFamily};
 
@@ -200,7 +223,7 @@ namespace engine {
             VkImageViewCreateInfo viewInfo{};
             viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             viewInfo.image = swapChainImages[i];
-            viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;  // Changed this to 3D
             viewInfo.format = swapChainImageFormat;
             viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             viewInfo.subresourceRange.baseMipLevel = 0;
@@ -215,6 +238,8 @@ namespace engine {
         }
     }
 
+    // The render pass is not contained by the swap chain, but we put it's creation here
+    // for convenience as it does requuire some information from the swapchain image
     void SwapChain::createRenderPass() {
         VkAttachmentDescription depthAttachment{};
         depthAttachment.format = findDepthFormat();
@@ -276,6 +301,7 @@ namespace engine {
         }
     }
 
+    // A frame buffer contains an image view and render pass
     void SwapChain::createFramebuffers() {
         swapChainFramebuffers.resize(imageCount());
         for (size_t i = 0; i < imageCount(); i++) {
@@ -412,6 +438,7 @@ namespace engine {
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
+    // The size of the image to be rendered. Must be accurate to be displayed correctly
     VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
