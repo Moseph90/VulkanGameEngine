@@ -29,7 +29,7 @@ namespace engine {
         VkExtent2D swapChainExtent;
 
         std::vector<VkFramebuffer> swapChainFramebuffers;
-        VkRenderPass renderPass;
+        VkRenderPass renderPass = reinterpret_cast<VkRenderPass>(1);
 
         std::vector<VkImage> depthImages;
         std::vector<VkDeviceMemory> depthImageMemorys;
@@ -66,7 +66,7 @@ namespace engine {
 
 
     public:
-        // We limit ourselves to submitting at most 2 command 
+        // We limit ourses to submitting at most 2 command 
         // buffers to the device's graphics queue at once. 
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 

@@ -12,11 +12,12 @@ layout (location = 0) in vec3 fragColor;
 
 layout (location = 0) out vec4 outColor;
 
-// This is connected to the push constants struct in RenderSystem.cpp
+// This communicates with the push constants struct in RenderSystem.cpp
 layout (push_constant) uniform Push {
-	mat4 transform;			// Projection * view * model
+	mat4 modelMatrix;
 	mat4 normalMatrix;
 } push;
+
 void main() {
 
 	// These values are RGB and the Alpha, meaning the value of the color. This is just a compiling 

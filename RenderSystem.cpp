@@ -10,12 +10,15 @@
 
 namespace engine {
 	struct SimplePushConstantData {
-		glm::mat4 transform{ 1.0f };
+		glm::mat4 modelMatrix{ 1.0f };
 		glm::mat4 normalMatrix{ 1.0f };
 	};
 
-	RenderSystem::RenderSystem(Device& tempDevice, VkRenderPass renderPass) : device{ tempDevice } {
-		createPipelineLayout();		// This creates the layout and initializes the device object settings
+	RenderSystem::RenderSystem(
+		Device& tempDevice, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) 
+		: device{ tempDevice } {
+		// This creates the layout and initializes the device object settings
+		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
@@ -23,7 +26,7 @@ namespace engine {
 		vkDestroyPipelineLayout(device.device(), pipelineLayout, nullptr);
 	}
 
-	void RenderSystem::createPipelineLayout() {
+	void RenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstantRange.offset = 0;
@@ -31,8 +34,13 @@ namespace engine {
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;
-		pipelineLayoutInfo.pSetLayouts = nullptr;
+
+		// Right now we only have one, but we will make vector for when we add more
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+
+		// This where we tell the pipeline about the descriptor set layouts
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 
 		//Push constants are a way to send very small amounts of data to our shader program
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
@@ -69,12 +77,22 @@ namespace engine {
 		FrameInfo& frameInfo, std::vector<GameObject> &gameObjects) {
 		pipeline->bind(frameInfo.commandBuffer);
 
-		auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
+		// We do this outside of the for loop (below this) 
+		// because there's no need to re-bind. We only do this 
+		// once and then the values in the GlobalUbo struct 
+		// (in Application.cpp) can be used by all game objects 
+		// without the need for re-binding
+		vkCmdBindDescriptorSets(
+			frameInfo.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout,
+			0, 1,
+			&frameInfo.globalDescriptorSet,
+			0, nullptr);
 
 		for (auto& obj : gameObjects) {
 			SimplePushConstantData push{};
-			auto modelMatrix = obj.transform.mat4();
-			push.transform = projectionView * modelMatrix;
+			push.modelMatrix = obj.transform.mat4();
 			push.normalMatrix = obj.transform.normalMatrix();
 
 			vkCmdPushConstants(

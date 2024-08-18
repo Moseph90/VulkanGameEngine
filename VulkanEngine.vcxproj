@@ -154,6 +154,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Descriptors.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="InputController.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Descriptors.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="FrameInfo.h" />
     <ClInclude Include="GameObject.h" />

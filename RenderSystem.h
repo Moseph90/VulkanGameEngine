@@ -24,12 +24,12 @@ namespace engine {
 		std::unique_ptr<Pipeline> pipeline;
 		VkPipelineLayout pipelineLayout;
 
-		void createPipelineLayout();
+		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
 	public:
 
-		RenderSystem(Device &device, VkRenderPass renderPass);
+		RenderSystem(Device &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~RenderSystem();
 
 		void renderGameObjects(
