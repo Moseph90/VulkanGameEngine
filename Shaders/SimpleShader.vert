@@ -27,7 +27,9 @@ layout (location = 0) out vec3 fragColor;
 // set and binding must match what we used when setting up our descriptor set layout
 layout (set = 0, binding = 0) uniform GlobalUbo {
 	mat4 projectionViewMatrix;
-	vec3 directionToLight;
+	vec4 ambientLightColor; // The 4th dimension is intensity
+	vec3 lightPosition;
+	vec4 lightColor;		// The 4th dimension is intensity
 } ubo;
 
 // This communicates with the push constants struct in RenderSystem.cpp
@@ -36,18 +38,11 @@ layout (push_constant) uniform Push {
 	mat4 normalMatrix;
 } push;
 
-const float AMBIENT = 0.02;
-
 //We will get vertices from the assembler and output a position
 void main() {
 
-	// This value will act as our output. It is a GLSL specific variable. The vertex index is a 
-	// built in GLSL variable that keeps track of which index we are on. This is a vector 4, note that 
-	// the first component counts as two because it is a vector2. The second one is a Z layer or depth. 
-	// The last parameter is what the entire vector is divided by in order to turn it into a normalized 
-	// coordinate. For now it's one
-	
-	gl_Position = ubo.projectionViewMatrix * push.modelMatrix * vec4(position, 1.0);
+	vec4 positionWorld = push.modelMatrix * vec4(position, 1.0);
+	gl_Position = ubo.projectionViewMatrix * positionWorld;
 
 	// To properly compute the lighting we require the normals to be tranformed 
 	// from model space to world space. We do this by using the model matrix
@@ -57,7 +52,17 @@ void main() {
 	
 	vec3 normalWorldSpace = normalize(mat3(push.normalMatrix) * normal);
 
-	float lightIntesity = AMBIENT + max(dot(normalWorldSpace, ubo.directionToLight), 0);
+	// We only care about the first 3 dimensions in this calculation, hence the .xyz
+	vec3 directionToLight = ubo.lightPosition - positionWorld.xyz;
 
-	fragColor = lightIntesity * color;
+	// Add attenuation. Using the dot product of a vector with itself is an easy
+	// and efficient way to	calculate the length of the vector squared. We also 
+	// this before we normalize the direction vector to get an accurate value
+	float attenuation = 1.0 / dot(directionToLight, directionToLight);
+
+	vec3 lightColor = ubo.lightColor.xyz * ubo.lightColor.w * attenuation;
+	vec3 ambientLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
+	vec3 diffuseLight = lightColor * max(dot(normalWorldSpace, normalize(directionToLight)), 0);
+
+	fragColor = (diffuseLight + ambientLight) * color;
 }

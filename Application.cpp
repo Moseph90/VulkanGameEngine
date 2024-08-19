@@ -17,7 +17,8 @@
 #include <iostream>
 
 namespace engine {
-    // This stuff is getting the scroll wheel behaviour from the user
+    // This stuff is getting the scroll wheel behaviour from 
+    // the user which I then use in the InputController class
     double scroll{ 0 };
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
         scroll = yoffset;
@@ -29,7 +30,17 @@ namespace engine {
     // engine has the framework to easily implement them.
     struct GlobalUbo {
         glm::mat4 projectionView{ 1.0f };
-        glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+        
+        // These need to be aligned to 16 bytes. But it doesn't work here because
+        // vec3 and vec4 are not the same size and the CPU packs it tightly and so
+        // they will not be aligned to every 16 bytes. One way to fix this is to add
+        // a variable such as uint32_t of padding which will be 4 bytes, this will be
+        // added and then cause the vec3 and vec4 to be aligned as vec3 is 12 bytes and
+        // vec4 is 16. Alternatively, we can make lightPosition a vec4 and ignore the W
+        // The final method, would be to add the alignas() keyword to align the variable
+        glm::vec4 ambientLightColor{ 1.0f, 1.0f, 1.0f, 0.02f }; // The 4th dimension is intensity
+        glm::vec3 lightPosition{ -1.0f };
+        alignas(16) glm::vec4 lightColor{ 1.0f }; // The 4th dimenstion will represent light intensity
     };
 
 	Application::Application() {
@@ -82,6 +93,7 @@ namespace engine {
         // This game object has no model and will not be rendered 
         // but is just used to store the camera's current state
         auto viewerObject = GameObject::createGameObject();
+        viewerObject.transform.translation.z = -2.5f;   // Move the camera back a little
         InputController cameraController{ window.getGLFWwindow()};
 
         // Here we are creating a chrono object so that we can implement time
@@ -114,7 +126,7 @@ namespace engine {
 
             //We removed this one in favor of perspective
             //***camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);***// 
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 1010.0f);
 
 			// The beginFrame function in Renderer will return
 			// a nullptr if the swap chain needs to be created
@@ -153,22 +165,29 @@ namespace engine {
         std::shared_ptr<Model> model = Model::createModelFromFile(device, "TestModels/flat_vase.obj");
         auto gameObject = GameObject::createGameObject();
         gameObject.model = model;
-        gameObject.transform.translation = { 2.0f, 0.5f, 2.5f };
+        gameObject.transform.translation = { 2.0f, 0.5f, 0.0f };
         gameObject.transform.scale = glm::vec3{3.0f};
         gameObjects.push_back(std::move(gameObject));
 
         model = Model::createModelFromFile(device, "TestModels/smooth_vase.obj");
         auto smoothVase = GameObject::createGameObject();
         smoothVase.model = model;
-        smoothVase.transform.translation = { 0.0f, 0.5f, 2.5f };
+        smoothVase.transform.translation = { 0.0f, 0.5f, 0.0f };
         smoothVase.transform.scale = glm::vec3(3.0f);
         gameObjects.push_back(std::move(smoothVase));
 
-        model = Model::createModelFromFile(device, "TestModels/colored_cube.obj");
-        auto coloredCube = GameObject::createGameObject();
-        coloredCube.model = model;
-        coloredCube.transform.translation = { -2.0f, 0.0f, 2.5f };
-        coloredCube.transform.scale = glm::vec3(0.5f);
-        gameObjects.push_back(std::move(coloredCube));
+        model = Model::createModelFromFile(device, "TestModels/quad.obj");
+        auto plane = GameObject::createGameObject();
+        plane.model = model;
+        plane.transform.translation = { 0.0f, 0.5f, 0.0f };
+        plane.transform.scale = { 3.0f, 2.0f, 2.0f };
+        gameObjects.push_back(std::move(plane));
+
+        model = Model::createModelFromFile(device, "TestModels/cube.obj");
+        auto cube = GameObject::createGameObject();
+        cube.model = model;
+        cube.transform.translation = { -2.0f, 0.0f, 0.0f };
+        cube.transform.scale = glm::vec3(0.5f);
+        gameObjects.push_back(std::move(cube));
     }
 }
