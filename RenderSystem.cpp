@@ -73,8 +73,7 @@ namespace engine {
 			device,
 			pipelineConfig);
 	}
-	void RenderSystem::renderGameObjects(
-		FrameInfo& frameInfo, std::vector<GameObject> &gameObjects) {
+	void RenderSystem::renderGameObjects(FrameInfo& frameInfo) {
 		pipeline->bind(frameInfo.commandBuffer);
 
 		// We do this outside of the for loop (below this) 
@@ -90,7 +89,9 @@ namespace engine {
 			&frameInfo.globalDescriptorSet,
 			0, nullptr);
 
-		for (auto& obj : gameObjects) {
+		for (auto& kv : frameInfo.gameObjects) {
+			auto& obj = kv.second;
+			if (obj.model == nullptr) continue;
 			SimplePushConstantData push{};
 			push.modelMatrix = obj.transform.mat4();
 			push.normalMatrix = obj.transform.normalMatrix();

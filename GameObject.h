@@ -4,6 +4,7 @@
 
 #include <glm/gtc/matrix_transform.hpp> // This helps us construct 4x4 transformation matrices
 #include <memory>
+#include <unordered_map>
 
 namespace engine {
 	struct TransformComponent {
@@ -23,6 +24,7 @@ namespace engine {
 	class GameObject {
 	public:
 		using id_t = unsigned int;
+		using Map = std::unordered_map<id_t, GameObject>;
 
 		static GameObject createGameObject() {
 			static id_t currentId = 0;

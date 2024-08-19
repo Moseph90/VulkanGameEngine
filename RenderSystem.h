@@ -32,8 +32,7 @@ namespace engine {
 		RenderSystem(Device &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~RenderSystem();
 
-		void renderGameObjects(
-			FrameInfo& frameInfo, std::vector<GameObject> &gameObjects);
+		void renderGameObjects(FrameInfo& frameInfo);
 
 		RenderSystem(const RenderSystem&) = delete;				//Delete copy constructors
 		RenderSystem& operator=(const RenderSystem&) = delete;

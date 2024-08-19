@@ -35,7 +35,7 @@ namespace engine {
 		// Note: Order of declarations matters here so
 		// that objects are destroyed in the correct order
 		std::unique_ptr<DescriptorPool> globalPool{};
-		std::vector<GameObject> gameObjects;
+		GameObject::Map gameObjects;
 
 		void loadGameObjects();
 
