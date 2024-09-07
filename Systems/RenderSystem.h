@@ -1,13 +1,10 @@
 #pragma once
 
-#define WINDOW_WIDTH 3200					//Change these to alter the default window size
-#define WINDOW_HEIGHT 1800
-
-#include "Camera.h"
-#include "Device.h"
-#include "GameObject.h"
-#include "Pipeline.h"
-#include "FrameInfo.h"
+#include "../Camera.h"
+#include "../Device.h"
+#include "../GameObject.h"
+#include "../Pipeline.h"
+#include "../FrameInfo.h"
 
 // std
 #include <memory>

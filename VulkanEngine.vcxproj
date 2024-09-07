@@ -162,8 +162,9 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Pipeline.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="SwapChain.cpp" />
+    <ClCompile Include="Systems\PointLightSystem.cpp" />
+    <ClCompile Include="Systems\RenderSystem.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -178,13 +179,16 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="SwapChain.h" />
+    <ClInclude Include="Systems\PointLightSystem.h" />
+    <ClInclude Include="Systems\RenderSystem.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="compile.bat" />
+    <None Include="PointLight.frag" />
+    <None Include="PointLight.vert" />
+    <None Include="Shaders\compile.bat" />
     <None Include="Shaders\SimpleShader.frag" />
     <None Include="Shaders\SimpleShader.vert" />
   </ItemGroup>

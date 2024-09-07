@@ -21,6 +21,8 @@ namespace engine {
 		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;	//duplicate the pointers to our Vulkan objects
 		PipelineConfigInfo() = default;
 		
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 		VkPipelineViewportStateCreateInfo viewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;

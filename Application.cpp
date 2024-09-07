@@ -1,5 +1,6 @@
 #include "Application.h"
-#include "RenderSystem.h"
+#include "Systems/RenderSystem.h"
+#include "Systems/PointLightSystem.h"
 #include "Camera.h"
 #include "InputController.h"
 #include "Buffer.h"
@@ -29,7 +30,8 @@ namespace engine {
     // We can pass in point lights and other data in here, as now the
     // engine has the framework to easily implement them.
     struct GlobalUbo {
-        glm::mat4 projectionView{ 1.0f };
+        glm::mat4 projection{ 1.0f };
+        glm::mat4 view{ 1.0f };
         
         // These need to be aligned to 16 bytes. But it doesn't work here because
         // vec3 and vec4 are not the same size and the CPU packs it tightly and so
@@ -85,7 +87,9 @@ namespace engine {
         }
 
 		RenderSystem renderSystem{ 
-            device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+            device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+        PointLightSystem pointLightSystem{
+            device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
         Camera camera{};
         //camera.setViewDirection(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
         camera.setViewTarget(glm::vec3{-1.0f, -2.0f, 2.0f }, glm::vec3{0.0f, 0.0f, 2.5f});
@@ -147,13 +151,15 @@ namespace engine {
                 
                 // update in memory
                 GlobalUbo ubo{};
-                ubo.projectionView = camera.getProjection() * camera.getView();
+                ubo.projection = camera.getProjection();
+                ubo.view = camera.getView();
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();        // Manually flush memory to the GPU
 
                 // draw calls will be recorded
 				renderer.beginSwapChainRenderPass(commandBuffer);
 				renderSystem.renderGameObjects(frameInfo);
+                pointLightSystem.render(frameInfo);
 				renderer.endSwapChainRenderPass(commandBuffer);
 				renderer.endFrame();
 			}

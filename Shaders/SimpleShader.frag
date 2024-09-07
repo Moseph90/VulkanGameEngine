@@ -16,7 +16,8 @@ layout (location = 0) out vec4 outColor;
 
 // set and binding must match what we used when setting up our descriptor set layout
 layout (set = 0, binding = 0) uniform GlobalUbo {
-	mat4 projectionViewMatrix;
+	mat4 projection;
+	mat4 view;
 	vec4 ambientLightColor; // The 4th dimension is intensity
 	vec3 lightPosition;
 	vec4 lightColor;		// The 4th dimension is intensity

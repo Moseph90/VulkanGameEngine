@@ -28,7 +28,8 @@ layout (location = 2) out vec3 fragNormalWorld;
 
 // set and binding must match what we used when setting up our descriptor set layout
 layout (set = 0, binding = 0) uniform GlobalUbo {
-	mat4 projectionViewMatrix;
+	mat4 projection;
+	mat4 view;
 	vec4 ambientLightColor; // The 4th dimension is intensity
 	vec3 lightPosition;
 	vec4 lightColor;		// The 4th dimension is intensity
@@ -44,7 +45,7 @@ layout (push_constant) uniform Push {
 void main() {
 
 	vec4 positionWorld = push.modelMatrix * vec4(position, 1.0);
-	gl_Position = ubo.projectionViewMatrix * positionWorld;
+	gl_Position = ubo.projection * ubo.view * positionWorld;
 
 	// To properly compute the lighting we require the normals to be tranformed 
 	// from model space to world space. We do this by using the model matrix

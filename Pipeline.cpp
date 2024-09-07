@@ -84,8 +84,8 @@ namespace engine {
 		shaderStages[1].pSpecializationInfo = nullptr;
 
 		// We get our vertex descriptions from our model class to create the struct below this
-		auto bindingDescriptions = Model::Vertex::getBindingDescriptions();
-		auto attributeDescriptions = Model::Vertex::getAttributeDescriptions();
+		auto& bindingDescriptions = configInfo.bindingDescriptions;
+		auto& attributeDescriptions = configInfo.attributeDescriptions;
 		
 		// This struct is used to describe how we interpret our vertex 
 		// buffer data that is the initial data into our graphics pipeline
@@ -249,5 +249,8 @@ namespace engine {
 		configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
+
+		configInfo.bindingDescriptions = Model::Vertex::getBindingDescriptions();
+		configInfo.attributeDescriptions = Model::Vertex::getAttributeDescriptions();
 	}
 }
