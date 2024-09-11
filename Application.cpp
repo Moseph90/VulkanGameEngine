@@ -25,26 +25,6 @@ namespace engine {
         scroll = yoffset;
     }
 
-    // This serves a similar purpose as the simple push constant data
-    // using it as a way to pass and read data to the pipeline shaders
-    // We can pass in point lights and other data in here, as now the
-    // engine has the framework to easily implement them.
-    struct GlobalUbo {
-        glm::mat4 projection{ 1.0f };
-        glm::mat4 view{ 1.0f };
-        
-        // These need to be aligned to 16 bytes. But it doesn't work here because
-        // vec3 and vec4 are not the same size and the CPU packs it tightly and so
-        // they will not be aligned to every 16 bytes. One way to fix this is to add
-        // a variable such as uint32_t of padding which will be 4 bytes, this will be
-        // added and then cause the vec3 and vec4 to be aligned as vec3 is 12 bytes and
-        // vec4 is 16. Alternatively, we can make lightPosition a vec4 and ignore the W
-        // The final method, would be to add the alignas() keyword to align the variable
-        glm::vec4 ambientLightColor{ 1.0f, 1.0f, 1.0f, 0.02f }; // The 4th dimension is intensity
-        glm::vec3 lightPosition{ -1.0f };
-        alignas(16) glm::vec4 lightColor{ 1.0f }; // The 4th dimenstion will represent light intensity
-    };
-
 	Application::Application() {
         globalPool = 
             DescriptorPool::Builder(device)
@@ -86,9 +66,9 @@ namespace engine {
                 .build(globalDescriptorSets[i]);
         }
 
-		RenderSystem renderSystem{ 
+		RenderSystem renderSystem { 
             device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
-        PointLightSystem pointLightSystem{
+        PointLightSystem pointLightSystem {
             device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
         Camera camera{};
         //camera.setViewDirection(glm::vec3{ 0.0f }, glm::vec3{ 0.5f, 0.0f, 1.0f });
@@ -153,6 +133,7 @@ namespace engine {
                 GlobalUbo ubo{};
                 ubo.projection = camera.getProjection();
                 ubo.view = camera.getView();
+                pointLightSystem.update(frameInfo, ubo);
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();        // Manually flush memory to the GPU
 
@@ -196,5 +177,25 @@ namespace engine {
         cube.transform.translation = { -2.0f, 0.0f, 0.0f };
         cube.transform.scale = glm::vec3(0.5f);
         gameObjects.emplace(cube.getId(), std::move(cube));
+
+        std::vector<glm::vec3> lightColors{
+            {1.f, .1f, .1f},
+            {.1f, .1f, 1.f},
+            {.1f, 1.f, .1f},
+            {1.f, 1.f, .1f},
+            {.1f, 1.f, 1.f},
+            {1.f, 1.f, 1.f}
+        };
+
+        for (size_t i = 0; i < lightColors.size(); i++) {
+            auto pointLight = GameObject::makePointLight(0.2f);
+            pointLight.color = lightColors[i];
+            auto rotateLight = glm::rotate(
+                glm::mat4(1.0f), 
+                (i * glm::two_pi<float>()) / lightColors.size(), 
+                { 0.0f, -1.0f, 0.0f });
+            pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+            gameObjects.emplace(pointLight.getId(), std::move(pointLight));
+        }
     }
 }

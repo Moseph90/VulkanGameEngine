@@ -14,13 +14,18 @@ layout (location = 2) in vec3 fragNormalWorld;
 
 layout (location = 0) out vec4 outColor;
 
+struct PointLight {
+	vec4 position;	// Ignore w
+	vec4 color;	// w is intensity
+};
+
 // set and binding must match what we used when setting up our descriptor set layout
 layout (set = 0, binding = 0) uniform GlobalUbo {
 	mat4 projection;
 	mat4 view;
 	vec4 ambientLightColor; // The 4th dimension is intensity
-	vec3 lightPosition;
-	vec4 lightColor;		// The 4th dimension is intensity
+	PointLight pointLights[10];
+	int numLights;
 } ubo;
 
 // This communicates with the push constants struct in RenderSystem.cpp
@@ -30,21 +35,29 @@ layout (push_constant) uniform Push {
 } push;
 
 void main() {
-	// We only care about the first 3 dimensions in this calculation, hence the .xyz
-	vec3 directionToLight = ubo.lightPosition - fragPosWorld;
+	vec3 diffuseLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
+	vec3 surfaceNormal = normalize(fragNormalWorld);
 
-	// Add attenuation. Using the dot product of a vector with itself is an easy
-	// and efficient way to	calculate the length of the vector squared. We also 
-	// this before we normalize the direction vector to get an accurate value
-	float attenuation = 1.0 / dot(directionToLight, directionToLight);
+	// Loop through each point light available
+	for (int i = 0; i < ubo.numLights; i++) {
+		PointLight light = ubo.pointLights[i];
+		
+		// We only care about the first 3 dimensions in this calculation
+		vec3 directionToLight = light.position.xyz - fragPosWorld;
+	
+		// Add attenuation. Using the dot product of a vector with itself is an easy
+		// and efficient way to	calculate the length of the vector squared. We also 
+		// this before we normalize the direction vector to get an accurate value
+		float attenuation = 1.0 / dot(directionToLight, directionToLight);
+		
+		float cosAngleIncidence = max(dot(surfaceNormal, normalize(directionToLight)), 0);
+		vec3 intensity = light.color.xyz * light.color.w * attenuation * 2.5;
 
-	vec3 lightColor = ubo.lightColor.xyz * ubo.lightColor.w * attenuation;
-	vec3 ambientLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
-	vec3 diffuseLight = lightColor * max(dot(normalize(fragNormalWorld), normalize(directionToLight)), 0);
+		diffuseLight += intensity * cosAngleIncidence;
+	}
 
 	// These values are RGB and the Alpha, meaning the value of the color. This is just a compiling 
 	// stage that tells the graphics card which pixels the geometry mostly contains during the restorization 
 	// stage. It will use this to properly color the pixels later.
-
-	outColor = vec4((diffuseLight + ambientLight) * fragColor, 1.0);
+	outColor = vec4(diffuseLight * fragColor, 1.0);
 }

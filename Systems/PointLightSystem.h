@@ -29,6 +29,7 @@ namespace engine {
 		PointLightSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~PointLightSystem();
 
+		void update(FrameInfo& frameInfo, GlobalUbo& ubo);
 		void render(FrameInfo& frameInfo);
 
 		PointLightSystem(const PointLightSystem&) = delete;				//Delete copy constructors
