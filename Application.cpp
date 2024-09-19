@@ -133,6 +133,7 @@ namespace engine {
                 GlobalUbo ubo{};
                 ubo.projection = camera.getProjection();
                 ubo.view = camera.getView();
+                ubo.inverseView = camera.getInverseView();
                 pointLightSystem.update(frameInfo, ubo);
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();        // Manually flush memory to the GPU
@@ -188,7 +189,7 @@ namespace engine {
         };
 
         for (size_t i = 0; i < lightColors.size(); i++) {
-            auto pointLight = GameObject::makePointLight(0.2f);
+            auto pointLight = GameObject::makePointLight(0.5f);
             pointLight.color = lightColors[i];
             auto rotateLight = glm::rotate(
                 glm::mat4(1.0f), 

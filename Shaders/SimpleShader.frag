@@ -23,6 +23,7 @@ struct PointLight {
 layout (set = 0, binding = 0) uniform GlobalUbo {
 	mat4 projection;
 	mat4 view;
+	mat4 inverseView;
 	vec4 ambientLightColor; // The 4th dimension is intensity
 	PointLight pointLights[10];
 	int numLights;
@@ -36,7 +37,11 @@ layout (push_constant) uniform Push {
 
 void main() {
 	vec3 diffuseLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
+	vec3 specularLight = vec3(0.0); 	// Holds the total for each point light specular contribution
 	vec3 surfaceNormal = normalize(fragNormalWorld);
+
+	vec3 cameraPosWorld = ubo.inverseView[3].xyz;
+	vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
 
 	// Loop through each point light available
 	for (int i = 0; i < ubo.numLights; i++) {
@@ -49,15 +54,25 @@ void main() {
 		// and efficient way to	calculate the length of the vector squared. We also 
 		// this before we normalize the direction vector to get an accurate value
 		float attenuation = 1.0 / dot(directionToLight, directionToLight);
+		directionToLight = normalize(directionToLight);
 		
-		float cosAngleIncidence = max(dot(surfaceNormal, normalize(directionToLight)), 0);
-		vec3 intensity = light.color.xyz * light.color.w * attenuation * 2.5;
+		float cosAngleIncidence = max(dot(surfaceNormal, directionToLight), 0);
+		vec3 intensity = light.color.xyz * light.color.w * attenuation;
 
 		diffuseLight += intensity * cosAngleIncidence;
+
+		// Specular lighting
+		vec3 halfAngle = normalize(directionToLight + viewDirection);
+		float blinnTerm = dot(surfaceNormal, halfAngle);
+
+		// Ignore cases when the viewer and light are on opossite sides of the surface
+		blinnTerm = clamp(blinnTerm, 0, 1);
+		blinnTerm = pow(blinnTerm, 512.0);	// Highter value = sharper highlight
+		specularLight += intensity * blinnTerm;
 	}
 
 	// These values are RGB and the Alpha, meaning the value of the color. This is just a compiling 
 	// stage that tells the graphics card which pixels the geometry mostly contains during the restorization 
 	// stage. It will use this to properly color the pixels later.
-	outColor = vec4(diffuseLight * fragColor, 1.0);
+	outColor = vec4(diffuseLight * fragColor + specularLight * fragColor, 1.0);
 }

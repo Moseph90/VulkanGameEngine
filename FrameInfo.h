@@ -26,6 +26,7 @@ namespace engine {
     struct GlobalUbo {
         glm::mat4 projection{ 1.0f };
         glm::mat4 view{ 1.0f };
+        glm::mat4 inverseView{ 1.0f };
 
         // These need to be aligned to 16 bytes. But it doesn't work here because
         // vec3 and vec4 are not the same size and the CPU packs it tightly and so
