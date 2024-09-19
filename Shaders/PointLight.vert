@@ -1,5 +1,10 @@
 #version 450
 
+//*******************************************************************************************************
+// This vertex shader is specifically for the point lights, we need a separate file as the vertices for
+// point lights are caculated differently from those of regular game objects. There is also a .frag file
+//*******************************************************************************************************
+
 const vec2 OFFSETS[6] = vec2[](
   vec2(-1.0, -1.0),
   vec2(-1.0, 1.0),

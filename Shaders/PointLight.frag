@@ -1,5 +1,12 @@
 #version 450
 
+//********************************************************************************************************
+//This is the fragment shader. A fragment shader is capable of outputting to multiple different locations
+//There is no built in output variable for this one so we have to build our own. This particular file is
+//for the point lights, as point lights are rendered differently than regular game objects, this also has
+//transparency and alpha blending functionality. Similarly, there is a .vert file for point lights as well
+//********************************************************************************************************
+
 layout (location = 0) in vec2 fragOffset;
 layout (location = 0) out vec4 outColor;
 
@@ -24,10 +31,15 @@ layout(push_constant) uniform Push {
 	float radius;
 } push;
 
+const float M_PI = 3.1415926538;
+
 void main() {
 	float dist = sqrt(dot(fragOffset, fragOffset));
 	if (dist >= 1.0) {
 		discard;
 	}
-	outColor = vec4(push.color.xyz, 1.0);
+	
+	// Make the center of the light white and gradually change to the proper color near the edges
+	float cosDist =  0.5 * (cos(dist * M_PI) + 1.0); // Ranges from 1 -> 0
+	outColor = vec4(push.color.xyz + cosDist, cosDist);
 }

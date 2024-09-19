@@ -8,7 +8,7 @@
  
  3. This program uses tiny object loader, which is header file that contains code for loading in obj files. You will need to get this file and include it in the project. Here's a URL for the file: https://github.com/tinyobjloader/tinyobjloader | you only need the tiny_obj_loader.h file in the list. If you're having trouble including it in the project, just add it to the actual project folder and reference it that way, you may have to change the <> with "" for the include header which is located in the Model.cpp file. 
  
- 4. The actual obj files that are in this project can be found here: https://drive.google.com/file/d/1xUarUaPfl9w8R0176LqmoAxSGmr8_FaU/view?usp=drive_link | just unzip the folder and put it in the main project folder. If you need to update the file path in the program, you can do that in the Application.cpp file in the loadGameObjects function. These file paths are for each of the models, you can change them to match where you put the folder. Note that you may have to include a full path if it is not in the main project folder.
+ 4. The actual obj files that are in this project can be found here: https://drive.google.com/file/d/1ysiOzOamHn2rr_CIRmAX4QgDUl7jNNy5/view?usp=drive_link | just unzip the folder and put it in the main project folder. If you need to update the file path in the program, you can do that in the Application.cpp file in the loadGameObjects function. These file paths are for each of the models, you can change them to match where you put the folder. Note that you may have to include a full path if it is not in the main project folder. Also, the program loads up 2 models, the car and the quad(plane). The other ones are commented out, if you wish to load them in, simply uncomment them. You can also add more game objects if you wish by copying the code for a model and pasting it then changing the file path and the variable names.
 
  Controls (when you get the program running a window with a couple 3D models will appear):
 
@@ -34,3 +34,8 @@
 To have the best chance of understanding the program, go to the Application.h/Application.cpp files. This is the heart of the program and is what all of the builder classes connect to. From there, you will find extensive commentary to help you understand what everything does. The entire program loop runs in the run() function in the Application.h/Application.cpp file. If you start at the top of the h file, you will see some objects being created which in turn start an extensive build process. This URL is a great visualization of the graphics pipeline steps and how they connect: https://vulkan.lunarg.com/doc/view/latest/windows/tutorial/html/14-init_pipeline.html | Note that the GameObject class uses the Model class to create models and so the Application class will often use the Model class through the GameObject class.
 
 Follow the functions in the Application class to get a good understanding of the flow of the program. I did my best to include as much commentary as possible in order to explain how it all works, but in the end, a graphics engine (especially Vulkan) is very complicated and requires a lot of study. If you are in doubt, see the Vulkan API here: https://docs.vulkan.org/guide/latest/protected.html | Enjoy!
+
+***Making OBJ files to render***
+This program only takes wavefront obj files, load your model into blender and export using these settings:
+
+![alt text](https://drive.google.com/file/d/11nbk_LXf-6smAOH3DBamFLvjYyUSrNkd/view?usp=sharing/Screenshot.png)

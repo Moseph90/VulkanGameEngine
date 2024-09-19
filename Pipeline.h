@@ -17,9 +17,9 @@ namespace engine {
 	//This contains the data sepcifying how we want to configure our pipeline. This info
 	//will be accessible by our application and is easily shared among the rest of the program.
 	struct PipelineConfigInfo {
+		PipelineConfigInfo() = default;
 		PipelineConfigInfo(const PipelineConfigInfo&) = delete;				//More clean up so that we don't accidentally 
 		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;	//duplicate the pointers to our Vulkan objects
-		PipelineConfigInfo() = default;
 		
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
@@ -68,5 +68,6 @@ namespace engine {
 		void bind(VkCommandBuffer commandBuffer);
 
 		static void defultPipelineConfigInfo(PipelineConfigInfo& configInfo);
+		static void enableAlphaBlending(PipelineConfigInfo& configInfo);
 	};
 }

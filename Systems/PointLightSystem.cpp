@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <array>
+#include <map>
 
 namespace engine {
 
@@ -61,6 +62,7 @@ namespace engine {
 		PipelineConfigInfo pipelineConfig{};
 		//Here we use the swapchain's width and height as it may not match the window's
 		Pipeline::defultPipelineConfigInfo(pipelineConfig);
+		Pipeline::enableAlphaBlending(pipelineConfig);
 
 		pipelineConfig.bindingDescriptions.clear();
 		pipelineConfig.attributeDescriptions.clear();
@@ -102,6 +104,17 @@ namespace engine {
 	}
 
 	void PointLightSystem::render(FrameInfo& frameInfo) {
+		std::map<float, GameObject::id_t> sorted;
+		for (auto& kv : frameInfo.gameObjects) {
+			auto& obj = kv.second;
+			if (obj.pointLight == nullptr) continue;
+
+			// Calculate distance
+			auto offset = frameInfo.camera.getPosition() - obj.transform.translation;
+			float distSquared = glm::dot(offset, offset);
+			sorted[distSquared] = obj.getId();
+		}
+
 		pipeline->bind(frameInfo.commandBuffer);
 
 		// We do this outside of the for loop (below this) 
@@ -117,9 +130,11 @@ namespace engine {
 			&frameInfo.globalDescriptorSet,
 			0, nullptr);
 
-		for (auto& kv : frameInfo.gameObjects) {
-			auto& obj = kv.second;
-			if (obj.pointLight == nullptr) continue;
+		// Iterate through the sorted lights in reverse order so that we 
+		// maintain the correct transparency no matter the perspective
+		for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
+			// Use game obj id to find light object
+			auto& obj = frameInfo.gameObjects.at(it->second);
 
 			PointLightPushConstants push{};
 			push.position = glm::vec4(obj.transform.translation, 1.0f);

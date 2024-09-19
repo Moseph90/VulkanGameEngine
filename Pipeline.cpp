@@ -207,8 +207,8 @@ namespace engine {
 		configInfo.multisampleInfo.alphaToCoverageEnable = VK_FALSE;  // Optional
 		configInfo.multisampleInfo.alphaToOneEnable = VK_FALSE;       // Optional
 
-		//This is controls how we combine colors in our frame buffer. If we have overlapping traingles, our fragment shader will return multiple
-		//colors for some pixels in our frame buffer.
+		// This is controls how we combine colors in our frame buffer. If we have overlapping traingles, 
+		// our fragment shader will return multiple colors for some pixels in our frame buffer.
 		configInfo.colorBlendAttachment.colorWriteMask =
 			VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
 			VK_COLOR_COMPONENT_A_BIT;
@@ -252,5 +252,26 @@ namespace engine {
 
 		configInfo.bindingDescriptions = Model::Vertex::getBindingDescriptions();
 		configInfo.attributeDescriptions = Model::Vertex::getAttributeDescriptions();
+	}
+
+	// Helper function to enable alpha blending
+	void Pipeline::enableAlphaBlending(PipelineConfigInfo& configInfo) {
+		configInfo.colorBlendAttachment.blendEnable = VK_TRUE;
+
+		// This is controls how we combine colors in our frame buffer. If we have overlapping traingles, 
+		// our fragment shader will return multiple colors for some pixels in our frame buffer.
+		configInfo.colorBlendAttachment.colorWriteMask =
+			VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
+			VK_COLOR_COMPONENT_A_BIT;
+		configInfo.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+
+		// How much the existing value in the color attachment contributes. As long 
+		// as we're rendering solid objects first, using one minus alpha will work.
+		// We also have to make sure we're rendering transparent objects farthest to closest.
+		configInfo.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		configInfo.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+		configInfo.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		configInfo.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	}
 }
