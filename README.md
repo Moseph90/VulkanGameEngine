@@ -38,4 +38,4 @@ Follow the functions in the Application class to get a good understanding of the
 ***Making OBJ files to render***
 This program only takes wavefront obj files, load your model into blender and export using these settings:
 
-![alt text](https://drive.google.com/file/d/11nbk_LXf-6smAOH3DBamFLvjYyUSrNkd/view?usp=sharing/Screenshot.png)
+![alt text](https://drive.google.com/file/d/11nbk_LXf-6smAOH3DBamFLvjYyUSrNkd/view?usp=sharing)
